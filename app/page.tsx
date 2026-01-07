@@ -19,8 +19,10 @@ export default async function Home() {
   const progressPercentage = (totalSaved / TOTAL_GOAL) * 100;
 
   return (
-    <main className='min-h-screen bg-slate-50 p-6 md:p-12'>
-      <div className='max-w-6xl mx-auto space-y-8'>
+    <main className='min-h-screen bg-linear-to-br from-emerald-50 via-slate-50 to-blue-50 relative p-6 md:p-12'>
+      {/* Subtle background pattern */}
+      <div className='absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(16,185,129,0.08),transparent_50%),radial-gradient(circle_at_70%_80%,rgba(59,130,246,0.08),transparent_50%)] pointer-events-none' />
+      <div className='max-w-6xl mx-auto space-y-8 relative z-10'>
         <header className='flex flex-col md:flex-row justify-between items-start md:items-center gap-6'>
           <div>
             <h1 className='text-3xl font-black text-slate-900 tracking-tight'>
