@@ -47,15 +47,18 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
   @keyframes shine {
-  0% {
-    background-position: 0% 0%;
+    0% {
+      background-position: 0% 0%;
     }
-  50% {
-    background-position: 100% 100%;
+
+    50% {
+      background-position: 100% 100%;
     }
-  to {
-    background-position: 0% 0%;
+
+    to {
+      background-position: 0% 0%;
     }
   }
 }
@@ -132,7 +135,9 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    -webkit-tap-highlight-color: transparent;
   }
+
   body {
     @apply bg-background text-foreground;
   }
