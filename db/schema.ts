@@ -5,6 +5,7 @@ import {
   integer,
   boolean,
   timestamp,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('user', {
@@ -68,3 +69,24 @@ export const savingsEntries = pgTable('savings_entries', {
   savedAt: timestamp('saved_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
+
+export const notificationSubscriptions = pgTable(
+  'notification_subscriptions',
+  {
+    id: serial('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id),
+    endpoint: text('endpoint').notNull(),
+    auth: text('auth').notNull(),
+    p256dh: text('p256dh').notNull(),
+    lastReminderAt: timestamp('last_reminder_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    endpointIdx: uniqueIndex('notification_subscriptions_endpoint_idx').on(
+      table.endpoint
+    ),
+  })
+);

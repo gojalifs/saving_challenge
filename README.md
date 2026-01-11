@@ -1,5 +1,36 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Saving Challenge Features
+
+- 52-week savings grid with optimistic client updates and celebratory confetti when a week is marked as saved.
+- Weekend reminder notification that appears on Friday, Saturday, and Sunday (once per day) if the current week has not been checked off yet. The reminder uses a `localStorage` key (`savingChallenge:lastReminderDate`) so you can clear it manually for testing.
+- Browser push notifications (via Web Push + service worker) that deliver the same weekend reminder even when the tab is closed, as long as the user has opted in.
+- Google OAuth and email/password authentication powered by Better Auth with Drizzle.
+
+### Verifying the weekend reminder
+
+1. Start the dev server (`pnpm dev`).
+2. Use DevTools to run `localStorage.removeItem('savingChallenge:lastReminderDate')` so the reminder can fire again.
+3. Temporarily change your system date (or override `Date` via DevTools) to Friday, Saturday, or Sunday.
+4. Refresh the dashboard without checking the current week. A toast reading *“Belum cek tantangan minggu ini? Jangan lupa setor tabunganmu.”* should appear once.
+5. Mark the current week as saved and refresh—the reminder should no longer display.
+
+### Enabling push notifications (Web Push)
+
+1. Generate VAPID keys once: `npx web-push generate-vapid-keys`.
+2. Copy the public key into both `NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY` and `WEB_PUSH_PUBLIC_KEY` in `.env`. Copy the private key into `WEB_PUSH_PRIVATE_KEY`. Provide a contact email via `WEB_PUSH_CONTACT_EMAIL` and set `REMINDER_SECRET` to a long random string. Restart `pnpm dev` after changing env vars.
+3. Visit the dashboard and click **Aktifkan Notifikasi Akhir Pekan**. Accept the browser permission prompt.
+4. Trigger the reminder endpoint manually to test delivery:
+
+```bash
+curl -X POST http://localhost:3000/api/notifications/remind \
+	-H "x-reminder-key: $REMINDER_SECRET"
+```
+
+Only users who (a) enabled push and (b) have not marked the current week as saved will receive messages. Each subscription receives at most one notification per day.
+
+> Deploy note: schedule the same POST request with a cron (e.g., Vercel Cron) for Friday–Sunday.
+
 ## Getting Started
 
 First, run the development server:

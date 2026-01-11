@@ -5,6 +5,7 @@ import { getProgress } from '@/db/actions';
 import { ChallengeGrid } from '@/components/challenge-grid';
 import { TOTAL_GOAL } from '@/lib/constants';
 import { LogoutButton } from '@/components/logout-button';
+import { NotificationOptIn } from '@/components/notification-opt-in';
 
 export default async function Home() {
   const session = await auth.api.getSession({
@@ -66,6 +67,8 @@ export default async function Home() {
         </header>
 
         <ChallengeGrid entries={entries} />
+
+        <NotificationOptIn />
       </div>
     </main>
   );

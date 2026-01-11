@@ -2,7 +2,7 @@
 
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
-import { savingsEntries } from '@/db/schema';
+import { notificationSubscriptions, savingsEntries } from '@/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
@@ -64,4 +64,76 @@ export async function getProgress() {
   const totalSaved = saved.reduce((acc, curr) => acc + curr.amount, 0);
 
   return { entries, totalSaved };
+}
+
+type PushSubscriptionKeys = {
+  auth: string;
+  p256dh: string;
+};
+
+type PushSubscriptionPayload = {
+  endpoint: string;
+  keys: PushSubscriptionKeys;
+};
+
+export async function registerPushSubscription(
+  subscription: PushSubscriptionPayload
+) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    throw new Error('Unauthorized');
+  }
+
+  const { endpoint, keys } = subscription;
+  if (!endpoint || !keys?.auth || !keys?.p256dh) {
+    throw new Error('Invalid subscription payload');
+  }
+
+  const now = new Date();
+
+  await db
+    .insert(notificationSubscriptions)
+    .values({
+      userId: session.user.id,
+      endpoint,
+      auth: keys.auth,
+      p256dh: keys.p256dh,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .onConflictDoUpdate({
+      target: notificationSubscriptions.endpoint,
+      set: {
+        userId: session.user.id,
+        auth: keys.auth,
+        p256dh: keys.p256dh,
+        updatedAt: now,
+      },
+    });
+
+  return { success: true };
+}
+
+export async function unregisterPushSubscription(endpoint: string) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    throw new Error('Unauthorized');
+  }
+
+  await db
+    .delete(notificationSubscriptions)
+    .where(
+      and(
+        eq(notificationSubscriptions.endpoint, endpoint),
+        eq(notificationSubscriptions.userId, session.user.id)
+      )
+    );
+
+  return { success: true };
 }

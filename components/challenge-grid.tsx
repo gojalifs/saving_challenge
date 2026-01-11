@@ -3,7 +3,12 @@
 import { SAVING_CHALLENGE_DATA } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { toggleSaving } from '@/db/actions';
-import { useState, useTransition, useRef } from 'react';
+import { useState, useTransition, useRef, useEffect } from 'react';
+import {
+  getCurrentWeekNumber,
+  getDateKey,
+  isReminderDay,
+} from '@/lib/reminders';
 import { Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -24,12 +29,14 @@ interface ToastItem {
   type?: ToastType;
   duration?: number;
 }
+const NOTIFICATION_STORAGE_KEY = 'savingChallenge:lastReminderDate';
 
 export function ChallengeGrid({ entries }: { entries: Entry[] }) {
   const [optimisticEntries, setOptimisticEntries] = useState(entries);
   const [, startTransition] = useTransition();
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const toastIdCounter = useRef(0);
+  const lastReminderKeyRef = useRef<string | null>(null);
 
   const addToast = (
     message: string,
@@ -96,6 +103,46 @@ export function ChallengeGrid({ entries }: { entries: Entry[] }) {
       }
     });
   };
+
+  useEffect(() => {
+    const now = new Date();
+    if (!isReminderDay(now)) return;
+
+    const todayKey = getDateKey(now);
+    const currentWeekNumber = getCurrentWeekNumber(now);
+    const hasSavedCurrentWeek = optimisticEntries.some(
+      (entry) => entry.isSaved && entry.weekNumber === currentWeekNumber
+    );
+
+    if (hasSavedCurrentWeek) return;
+
+    let storedKey: string | null = null;
+    try {
+      storedKey = localStorage.getItem(NOTIFICATION_STORAGE_KEY);
+    } catch {
+      // ignore storage access issues
+    }
+
+    if (
+      lastReminderKeyRef.current === todayKey ||
+      storedKey === todayKey
+    ) {
+      return;
+    }
+
+    addToast(
+      'Belum cek tantangan minggu ini? Jangan lupa setor tabunganmu.',
+      'info',
+      6000
+    );
+    lastReminderKeyRef.current = todayKey;
+
+    try {
+      localStorage.setItem(NOTIFICATION_STORAGE_KEY, todayKey);
+    } catch {
+      // ignore storage access issues
+    }
+  }, [optimisticEntries]);
 
   return (
     <>
