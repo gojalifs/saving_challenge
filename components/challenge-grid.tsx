@@ -41,7 +41,7 @@ export function ChallengeGrid({ entries }: { entries: Entry[] }) {
   const addToast = (
     message: string,
     type: ToastType = 'info',
-    duration?: number
+    duration?: number,
   ) => {
     toastIdCounter.current += 1;
     const id = `toast-${toastIdCounter.current}`;
@@ -56,7 +56,7 @@ export function ChallengeGrid({ entries }: { entries: Entry[] }) {
   const handleToggle = (
     week: number,
     currentStatus: boolean,
-    event: React.MouseEvent
+    event: React.MouseEvent,
   ) => {
     const newStatus = !currentStatus;
 
@@ -80,7 +80,7 @@ export function ChallengeGrid({ entries }: { entries: Entry[] }) {
       const existing = prev.find((e) => e.weekNumber === week);
       if (existing) {
         return prev.map((e) =>
-          e.weekNumber === week ? { ...e, isSaved: newStatus } : e
+          e.weekNumber === week ? { ...e, isSaved: newStatus } : e,
         );
       }
       return [...prev, { weekNumber: week, isSaved: newStatus }];
@@ -97,8 +97,8 @@ export function ChallengeGrid({ entries }: { entries: Entry[] }) {
         // Revert optimistic update on error
         setOptimisticEntries((prev) =>
           prev.map((e) =>
-            e.weekNumber === week ? { ...e, isSaved: currentStatus } : e
-          )
+            e.weekNumber === week ? { ...e, isSaved: currentStatus } : e,
+          ),
         );
       }
     });
@@ -111,7 +111,7 @@ export function ChallengeGrid({ entries }: { entries: Entry[] }) {
     const todayKey = getDateKey(now);
     const currentWeekNumber = getCurrentWeekNumber(now);
     const hasSavedCurrentWeek = optimisticEntries.some(
-      (entry) => entry.isSaved && entry.weekNumber === currentWeekNumber
+      (entry) => entry.isSaved && entry.weekNumber === currentWeekNumber,
     );
 
     if (hasSavedCurrentWeek) return;
@@ -123,17 +123,14 @@ export function ChallengeGrid({ entries }: { entries: Entry[] }) {
       // ignore storage access issues
     }
 
-    if (
-      lastReminderKeyRef.current === todayKey ||
-      storedKey === todayKey
-    ) {
+    if (lastReminderKeyRef.current === todayKey || storedKey === todayKey) {
       return;
     }
 
     addToast(
       'Belum cek tantangan minggu ini? Jangan lupa setor tabunganmu.',
       'info',
-      6000
+      6000,
     );
     lastReminderKeyRef.current = todayKey;
 
@@ -149,7 +146,7 @@ export function ChallengeGrid({ entries }: { entries: Entry[] }) {
       <div className='grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4'>
         {SAVING_CHALLENGE_DATA.map((item) => {
           const isSaved = optimisticEntries.find(
-            (e) => e.weekNumber === item.week
+            (e) => e.weekNumber === item.week,
           )?.isSaved;
 
           const CardContent = (
@@ -179,7 +176,7 @@ export function ChallengeGrid({ entries }: { entries: Entry[] }) {
             >
               {isSaved ? (
                 <ShineBorder
-                  className='w-full h-full min-h-[100px] min-w-0 bg-[#cff4d2] text-emerald-950 cursor-pointer'
+                  className='w-full h-full min-h-25 min-w-0 bg-[#cff4d2] text-emerald-950 cursor-pointer'
                   shineColor={['#d1fae5', '#10b981', '#059669']}
                 >
                   {CardContent}
@@ -187,8 +184,8 @@ export function ChallengeGrid({ entries }: { entries: Entry[] }) {
               ) : (
                 <div
                   className={cn(
-                    'w-full h-full min-h-[100px] cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center transition-all duration-300',
-                    'bg-white border-slate-200 hover:border-emerald-300 hover:shadow-md text-slate-800'
+                    'w-full h-full min-h-25 cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center transition-all duration-300',
+                    'bg-white border-slate-200 hover:border-emerald-300 hover:shadow-md text-slate-800',
                   )}
                 >
                   {CardContent}
