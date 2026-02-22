@@ -32,7 +32,7 @@ type SubscriptionRecord = {
   lastReminderAt: Date | null;
 };
 
-export async function POST(request: Request) {
+export async function GET(request: Request) {
   if (!REMINDER_SECRET) {
     return NextResponse.json(
       { error: 'REMINDER_SECRET is not configured' },
@@ -40,8 +40,16 @@ export async function POST(request: Request) {
     );
   }
 
-  const providedSecret = request.headers.get('x-reminder-key');
-  if (providedSecret !== REMINDER_SECRET) {
+  const authHeader = request.headers.get('Authorization');
+  const querySecret = new URL(request.url).searchParams.get('secret');
+  const reminderKey = request.headers.get('x-reminder-key');
+
+  const isAuthorized =
+    authHeader === `Bearer ${REMINDER_SECRET}` ||
+    querySecret === REMINDER_SECRET ||
+    reminderKey === REMINDER_SECRET;
+
+  if (!isAuthorized) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
