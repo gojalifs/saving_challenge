@@ -3,6 +3,10 @@
     {
       "path": "/api/keep-alive",
       "schedule": "30 2 * * *"
+    },
+    {
+      "path": "/api/notifications/remind",
+      "schedule": "0 2 * * 5,6,0"
     }
   ]
 }
